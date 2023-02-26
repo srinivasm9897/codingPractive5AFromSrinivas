@@ -72,9 +72,9 @@ app.post("/movies/", async (request, response) => {
   const { directorId, movieName, leadActor } = request.body;
   const postMovieQuery = `
   INSERT INTO
-    movie (directorId, movieName, leadActor)
+    movie (director_id, movie_name, lead_actor)
   VALUES
-    ('${directorId}', ${movieName}, '${leadActor}');`;
+    ('${directorId}', '${movieName}', '${leadActor}');`;
   const movie = await database.run(postMovieQuery);
   const movieId = movie.lastId;
   response.send("Movie Successfully Added");
@@ -89,8 +89,8 @@ app.put("/movies/:movieId/", async (request, response) => {
   UPDATE
     movie
   SET
-    director_id = '${directorId}',
-    movie_name = ${movieName},
+    director_id = ${directorId},
+    movie_name = '${movieName}',
     lead_actor= '${leadActor}'
   WHERE
     movie_id = ${movieId};`;
@@ -129,7 +129,7 @@ app.get("/directors/", async (request, response) => {
       director;`;
   const DirectorArray = await database.all(getDirectorQuery);
   response.send(
-    MoviesArray.map((eachDirector) =>
+    DirectorArray.map((eachDirector) =>
       convertDbObjectToResponseObject2(eachDirector)
     )
   );
@@ -146,8 +146,10 @@ app.get("/directors/:directorId/movies/", async (request, response) => {
       movie 
     WHERE 
       director_id = ${directorId};`;
-  const player = await database.get(getDirectorQuery);
-  response.send(convertDbObjectToResponseObject(player));
+  const Movie = await database.all(getDirectorQuery);
+  response.send(
+    Movie.map((eachMovie) => ({ movieName: eachMovie.movie_name }))
+  );
 });
 
 module.exports = app;
